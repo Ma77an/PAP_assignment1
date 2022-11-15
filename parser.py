@@ -74,7 +74,7 @@ def parser(expression) -> float:
     # return 0.0
     queue = []
     stack = []
-    stackExp = []
+    stack_exp = []
 
     def is_number(str):
         try:
@@ -85,61 +85,59 @@ def parser(expression) -> float:
 
     split = re.findall("[+/*()-]|\d+", expression)
     splits = []
-    i=0
-    while i<(len(split) - 1):
+    i = 0
+    while i < (len(split) - 1):
         if split[i] == "(" and split[i + 1] == "-":
             splits.append(split[i + 1] + split[i + 2])
             i += 4
         else:
             splits.append(split[i])
-            i+=1
+            i += 1
     splits.append(split[len(split) - 1])
 
     for s in splits:
         if is_number(s):
             queue.append(s)
         else:
-            match s:
-                case "/":
-                    stack.append(s)
-                case "*":
-                    stack.append(s)
-                case "(":
-                    stack.append(s)
-                case "+":
-                    while (len(stack) > 0) and (stack[-1] == "*" or stack[-1] == "/"):
-                        queue.append(stack.pop())
-                    stack.append(s)
-                case "-":
-                    while (len(stack) > 0) and (stack[-1] == "*" or stack[-1] == "/"):
-                        queue.append(stack.pop())
-                    stack.append(s)
-                case ")":
-                    while (len(stack) > 0) and (not stack[len(stack) - 1] == "("):
-                        queue.append(stack.pop())
-                    if len(stack) > 0 and stack[-1]=="(":
-                        stack.pop()
+            if s == "/":
+                stack.append(s)
+            elif s == "*":
+                stack.append(s)
+            elif s == "(":
+                stack.append(s)
+            elif s == "+":
+                while (len(stack) > 0) and (stack[-1] == "*" or stack[-1] == "/" or stack[-1] == "-"):
+                    queue.append(stack.pop())
+                stack.append(s)
+            elif s == "-":
+                while (len(stack) > 0) and (stack[-1] == "*" or stack[-1] == "/"):
+                    queue.append(stack.pop())
+                stack.append(s)
+            elif s == ")":
+                while (len(stack) > 0) and (not stack[len(stack) - 1] == "("):
+                    queue.append(stack.pop())
+                if len(stack) > 0 and stack[-1] == "(":
+                    stack.pop()
 
     while len(stack) != 0:
         queue.append(stack.pop())
 
     for st in queue:
         if is_number(st):
-            stackExp.append(Num(int(st)))
+            stack_exp.append(Num(int(st)))
         else:
-            right = stackExp.pop()
-            left = stackExp.pop()
+            right = stack_exp.pop()
+            left = stack_exp.pop()
 
-            match st:
-                case "/":
-                    stackExp.append(Div(left, right))
-                case "*":
-                    stackExp.append(Mul(left, right))
-                case "+":
-                    stackExp.append(Plus(left, right))
-                case "-":
-                    stackExp.append(Minus(left, right))
+            if st == "/":
+                stack_exp.append(Div(left, right))
+            elif st == "*":
+                stack_exp.append(Mul(left, right))
+            elif st == "+":
+                stack_exp.append(Plus(left, right))
+            elif st == "-":
+                stack_exp.append(Minus(left, right))
 
-    result = math.floor(double(stackExp.pop().calc() * 1000)) / 1000.0
-    print(result)
+    result = math.floor(double(stack_exp.pop().calc() * 1000)) / 1000.0
+    # print(result)
     return result
